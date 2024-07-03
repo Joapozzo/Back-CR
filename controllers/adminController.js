@@ -15,6 +15,21 @@ const getCategorias = (req, res) => {
     });
 };
 
+const deleteCategoria = (req, res) => {
+    const { id } = req.body;
+    
+    // Sentencia SQL para eliminar el año por ID
+    const sql = 'DELETE FROM categorias WHERE id_categoria = ?';
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error eliminando la categoria:', err);
+            return res.status(500).send('Error eliminando la categoria');
+        }
+        res.status(200).send('Categoria eliminada correctamente');
+    });
+};
+
 const crearTorneo = (req, res) => {
     const { nombre, descripcion } = req.body;
     db.query('INSERT INTO torneos(nombre, descripcion) VALUES (?, ?)', [nombre, descripcion], (err, result) => {
@@ -30,6 +45,20 @@ const getTorneos = (req, res) => {
     });
 };
 
+const deleteTorneo = (req, res) => {
+    const { id } = req.body;
+    
+    const sql = 'DELETE FROM torneos WHERE id_torneo = ?';
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error eliminando el torneo:', err);
+            return res.status(500).send('Error eliminando el torneo');
+        }
+        res.status(200).send('Torneo eliminado correctamente');
+    });
+};
+
 const crearSede = (req, res) => {
     const { nombre, descripcion } = req.body;
     db.query('INSERT INTO sedes(nombre, descripcion) VALUES (?, ?)', [nombre, descripcion], (err, result) => {
@@ -42,6 +71,20 @@ const getSedes = (req, res) => {
     db.query('SELECT * FROM sedes', (err, result) => {
         if (err) return res.status(500).send('Error interno del servidor');
         res.send(result);
+    });
+};
+
+const deleteSede = (req, res) => {
+    const { id } = req.body;
+    
+    const sql = 'DELETE FROM sedes WHERE id_sede = ?';
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error eliminando la sede:', err);
+            return res.status(500).send('Error eliminando la sede');
+        }
+        res.status(200).send('Sede eliminada correctamente');
     });
 };
 
@@ -95,25 +138,49 @@ const getAnios = (req, res) => {
 };
 
 const crearTemporada = (req, res) => {
-    const { año, sede, categoria, torneo, descripcion } = req.body;
-    db.query('INSERT INTO temporadas(id_torneo, id_categoria, id_año, id_sede, descripcion) VALUES (?, ?, ?, ?, ?)', [torneo, categoria, año, sede, descripcion], (err, result) => {
+    const { año, sede, categoria, torneo, division, descripcion } = req.body;
+    db.query('INSERT INTO temporadas(id_torneo, id_categoria, id_año, id_sede, id_division, descripcion) VALUES (?, ?, ?, ?, ?, ?)', [torneo, categoria, año, sede, division, descripcion], (err, result) => {
         if (err) return res.status(500).send('Error interno del servidor');
         res.send('Temporada registrada con éxito');
     });
 };
 
 const getTemporadas = (req, res) => {
-    db.query(`SELECT id_temporada, torneos.nombre AS torneo, categorias.nombre AS categoria, años.año, sedes.nombre AS sede, temporadas.descripcion 
+    db.query(`SELECT 
+        id_temporada, 
+        torneos.nombre AS torneo, 
+        categorias.nombre AS categoria, 
+        años.año, 
+        sedes.nombre AS sede, 
+        divisiones.nombre AS division,
+        temporadas.descripcion
             FROM temporadas 
             INNER JOIN torneos ON temporadas.id_torneo = torneos.id_torneo 
             INNER JOIN categorias ON temporadas.id_categoria = categorias.id_categoria 
             INNER JOIN años ON temporadas.id_año = años.id_año 
-            INNER JOIN sedes ON temporadas.id_sede = sedes.id_sede`, 
+            INNER JOIN sedes ON temporadas.id_sede = sedes.id_sede
+            INNER JOIN divisiones ON temporadas.id_division = divisiones.id_division`, 
     (err, result) => {
         if (err) return res.status(500).send('Error interno del servidor');
         res.send(result);
     });
 };
+
+const deleteTemporada = (req, res) => {
+    const { id } = req.body;
+    
+    // Sentencia SQL para eliminar el año por ID
+    const sql = 'DELETE FROM temporadas WHERE id_temporada = ?';
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error eliminando la temporada:', err);
+            return res.status(500).send('Error eliminando la temporada');
+        }
+        res.status(200).send('Temporada eliminado correctamente');
+    });
+};
+
 
 const crearEquipo = (req, res) => {
     const { nombre, img, id_categoria, descripcion } = req.body;
@@ -138,20 +205,122 @@ const getEquipos = (req, res) => {
     });
 };
 
+
+const getDivisiones = (req, res) => {
+    db.query('SELECT * FROM divisiones', (err, result) => {
+        if (err) return res.status(500).send('Error interno del servidor');
+        res.send(result);
+    });
+};
+
+const crearDivision = (req, res) => {
+    const { nombre, descripcion } = req.body;
+    db.query('INSERT INTO divisiones(nombre, descripcion) VALUES (?, ?)', [nombre, descripcion], (err, result) => {
+        if (err) return res.status(500).send('Error interno del servidor');
+        res.send('Categoria registrada con éxito');
+    });
+};
+
+const getJugadores = (req, res) => {
+    db.query(
+        `SELECT 
+        jugadores.id_jugador, 
+        jugadores.dni, 
+        jugadores.nombre as jugador, 
+        jugadores.posicion as posicion, 
+        equipos.nombre as equipo,
+        jugadores.img
+        FROM jugadores 
+        INNER JOIN equipos ON equipos.id_equipo = jugadores.id_equipo;`
+    ,(err, result) => {
+        if (err) return res.status(500).send('Error interno del servidor');
+        res.send(result);
+    });
+};
+
+const getUsuarios = (req, res) => {
+    db.query(
+        `SELECT 
+            usuarios.id_usuario, 
+            usuarios.dni, 
+            CONCAT(UPPER(usuarios.apellido), ', ', usuarios.nombre) AS usuario, 
+            usuarios.nacimiento, 
+            usuarios.telefono, 
+            roles.nombre AS rol, 
+            equipos.nombre AS equipo, 
+            usuarios.estado 
+        FROM 
+            usuarios 
+        INNER JOIN 
+            roles ON roles.id_rol = usuarios.id_rol 
+        INNER JOIN 
+            equipos ON equipos.id_equipo = usuarios.id_equipo_fav;`
+    ,(err, result) => {
+        if (err) return res.status(500).send('Error interno del servidor');
+        res.send(result);
+    });
+};
+
+const getPartidos = (req, res) => {
+    db.query(
+        `SELECT 
+            p.id_partido,
+            e1.nombre AS equipoLocal,
+            e2.nombre AS equipoVisita,
+            p.jornada,
+            p.susp,
+            p.dia,
+            p.hora,
+            p.goles_local,
+            p.goles_visita,
+            p.pen_local,
+            p.pen_visita,
+            p.cancha,
+            p.arbitro,
+            p.destacado,
+            p.descripcion,
+            u.nombre AS planillero,
+            j.nombre AS jugador_destacado
+        FROM 
+            partidos p
+        INNER JOIN 
+            temporadas t ON p.id_temporada = t.id_temporada
+        INNER JOIN 
+            equipos e1 ON p.id_equipoLocal = e1.id_equipo
+        INNER JOIN 
+            equipos e2 ON p.id_equipoVisita = e2.id_equipo
+        LEFT JOIN 
+            usuarios u ON p.id_planillero = u.id_usuario
+        LEFT JOIN 
+            jugadores j ON p.id_jugador_destacado = j.id_jugador;`
+    ,(err, result) => {
+        if (err) return res.status(500).send('Error interno del servidor');
+        res.send(result);
+    });
+};
+
 module.exports = {
     crearCategoria,
     getCategorias,
+    deleteCategoria,
     crearTorneo,
     getTorneos,
+    deleteTorneo,
     crearSede,
     getSedes,
+    deleteSede,
     crearAnio,
     importarAnio,
     deleteAnio,
     getAnios,
     crearTemporada,
     getTemporadas,
+    deleteTemporada,
     crearEquipo,
-    getEquipos
-    
+    getEquipos,
+    getDivisiones,
+    crearDivision,
+    getJugadores,
+    getUsuarios,
+    getPartidos
 };
