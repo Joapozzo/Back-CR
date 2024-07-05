@@ -28,16 +28,13 @@ router.get('/get-temporadas', revisarCookie, revisarAdmin, adminController.getTe
 router.post('/delete-temporada', revisarCookie, revisarAdmin, adminController.deleteTemporada);
 
 router.post('/crear-equipo', revisarCookie, revisarAdmin, adminController.crearEquipo);
-router.get('/get-equipos', revisarCookie, revisarAdmin, adminController.getEquipos);
 
 router.post('/crear-division', revisarCookie, revisarAdmin, adminController.crearDivision);
 router.get('/get-divisiones', revisarCookie, revisarAdmin, adminController.getDivisiones);
 
-router.get('/get-jugadores', revisarCookie, revisarAdmin, adminController.getJugadores);
 
 router.get('/get-usuarios', revisarCookie, revisarAdmin, adminController.getUsuarios);
 
-router.get('/get-partidos', revisarCookie, revisarAdmin, adminController.getPartidos);
 
 
 

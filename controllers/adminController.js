@@ -190,20 +190,7 @@ const crearEquipo = (req, res) => {
     });
 };
 
-const getEquipos = (req, res) => {
-    db.query(
-        `SELECT 
-            e.nombre,
-            e.img,
-            c.nombre as categoria,
-            e.descripcion
-        FROM equipos as e
-        INNER JOIN categorias as c ON c.id_categoria = e.id_categoria`
-    ,(err, result) => {
-        if (err) return res.status(500).send('Error interno del servidor');
-        res.send(result);
-    });
-};
+
 
 
 const getDivisiones = (req, res) => {
@@ -221,22 +208,7 @@ const crearDivision = (req, res) => {
     });
 };
 
-const getJugadores = (req, res) => {
-    db.query(
-        `SELECT 
-        jugadores.id_jugador, 
-        jugadores.dni, 
-        jugadores.nombre as jugador, 
-        jugadores.posicion as posicion, 
-        equipos.nombre as equipo,
-        jugadores.img
-        FROM jugadores 
-        INNER JOIN equipos ON equipos.id_equipo = jugadores.id_equipo;`
-    ,(err, result) => {
-        if (err) return res.status(500).send('Error interno del servidor');
-        res.send(result);
-    });
-};
+
 
 const getUsuarios = (req, res) => {
     db.query(
@@ -248,7 +220,8 @@ const getUsuarios = (req, res) => {
             usuarios.telefono, 
             roles.nombre AS rol, 
             equipos.nombre AS equipo, 
-            usuarios.estado 
+            usuarios.estado,
+            usuarios.img
         FROM 
             usuarios 
         INNER JOIN 
@@ -261,43 +234,7 @@ const getUsuarios = (req, res) => {
     });
 };
 
-const getPartidos = (req, res) => {
-    db.query(
-        `SELECT 
-            p.id_partido,
-            e1.nombre AS equipoLocal,
-            e2.nombre AS equipoVisita,
-            p.jornada,
-            p.susp,
-            p.dia,
-            p.hora,
-            p.goles_local,
-            p.goles_visita,
-            p.pen_local,
-            p.pen_visita,
-            p.cancha,
-            p.arbitro,
-            p.destacado,
-            p.descripcion,
-            u.nombre AS planillero,
-            j.nombre AS jugador_destacado
-        FROM 
-            partidos p
-        INNER JOIN 
-            temporadas t ON p.id_temporada = t.id_temporada
-        INNER JOIN 
-            equipos e1 ON p.id_equipoLocal = e1.id_equipo
-        INNER JOIN 
-            equipos e2 ON p.id_equipoVisita = e2.id_equipo
-        LEFT JOIN 
-            usuarios u ON p.id_planillero = u.id_usuario
-        LEFT JOIN 
-            jugadores j ON p.id_jugador_destacado = j.id_jugador;`
-    ,(err, result) => {
-        if (err) return res.status(500).send('Error interno del servidor');
-        res.send(result);
-    });
-};
+
 
 module.exports = {
     crearCategoria,
@@ -317,10 +254,7 @@ module.exports = {
     getTemporadas,
     deleteTemporada,
     crearEquipo,
-    getEquipos,
     getDivisiones,
     crearDivision,
-    getJugadores,
-    getUsuarios,
-    getPartidos
+    getUsuarios
 };
